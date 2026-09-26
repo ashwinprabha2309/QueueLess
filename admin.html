@@ -55,9 +55,7 @@
             padding: 20px;
             border-radius: 15px;
             text-align: center;
-            box-shadow:
-                0 5px 20px
-                rgba(0,0,0,0.08);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
         }
 
         .stat-title {
@@ -76,9 +74,7 @@
             padding: 20px;
             border-radius: 16px;
             margin-bottom: 20px;
-            box-shadow:
-                0 5px 20px
-                rgba(0,0,0,0.08);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
         }
 
         .current {
@@ -399,9 +395,7 @@
 
 
         <div id="queueList">
-
             Loading queue...
-
         </div>
 
     </div>
@@ -420,7 +414,6 @@
 
 <script>
 
-
 let currentUser = null;
 
 
@@ -431,25 +424,22 @@ let currentUser = null;
 function showError(message) {
 
     const box =
-        document.getElementById(
-            "errorBox"
-        );
+        document.getElementById("errorBox");
 
     box.innerText =
         message;
 
     box.style.display =
         "block";
-
 }
 
 
 
 /* =========================
-   CHECK LOGIN
+   CHECK ADMIN LOGIN
 ========================= */
 
-async function checkLogin() {
+async function checkAdminLogin() {
 
     const {
         data,
@@ -467,7 +457,6 @@ async function checkLogin() {
             "login.html";
 
         return false;
-
     }
 
 
@@ -475,8 +464,72 @@ async function checkLogin() {
         data.user;
 
 
-    return true;
+    /*
+       Get the user's session.
+       The admin role is stored in
+       Supabase app_metadata.
+    */
 
+    const {
+        data: sessionData,
+        error: sessionError
+    } = await queueDB.auth.getSession();
+
+
+    if (
+        sessionError ||
+        !sessionData ||
+        !sessionData.session
+    ) {
+
+        window.location.href =
+            "login.html";
+
+        return false;
+    }
+
+
+    const user =
+        sessionData.session.user;
+
+
+    const role =
+        user.app_metadata &&
+        user.app_metadata.role;
+
+
+    console.log(
+        "Logged in user:",
+        user.email
+    );
+
+    console.log(
+        "User role:",
+        role
+    );
+
+
+    /*
+       Only users with role = admin
+       can enter this dashboard.
+    */
+
+    if (role !== "admin") {
+
+        alert(
+            "Access denied. Admin account required."
+        );
+
+        await queueDB.auth.signOut();
+
+        window.location.href =
+            "login.html";
+
+        return false;
+    }
+
+
+    return true;
 }
 
 
@@ -513,17 +566,15 @@ async function getCustomers() {
 
 
         showError(
-            "Admin access is not configured yet. We need to add the admin permission in Supabase."
+            "Could not load the queue. Check your admin permissions."
         );
 
 
         return [];
-
     }
 
 
     return data || [];
-
 }
 
 
@@ -541,23 +592,20 @@ async function updateDashboard() {
     const serving =
         customers.find(
             customer =>
-                customer.status ===
-                "serving"
+                customer.status === "serving"
         );
 
 
     const waiting =
         customers.filter(
             customer =>
-                customer.status ===
-                "waiting"
+                customer.status === "waiting"
         );
 
 
     document.getElementById(
         "nowServing"
     ).innerText =
-
         serving
         ? serving.token
         : "—";
@@ -566,7 +614,6 @@ async function updateDashboard() {
     document.getElementById(
         "currentToken"
     ).innerText =
-
         serving
         ? serving.token
         : "—";
@@ -575,7 +622,6 @@ async function updateDashboard() {
     document.getElementById(
         "currentName"
     ).innerText =
-
         serving
         ? serving.name
         : "No customer";
@@ -584,7 +630,6 @@ async function updateDashboard() {
     document.getElementById(
         "currentPlace"
     ).innerText =
-
         serving
         ? serving.place
         : "";
@@ -593,7 +638,6 @@ async function updateDashboard() {
     document.getElementById(
         "nextCustomer"
     ).innerText =
-
         waiting.length > 0
         ? waiting[0].token
         : "—";
@@ -619,7 +663,6 @@ async function updateDashboard() {
             '</div>';
 
         return;
-
     }
 
 
@@ -630,9 +673,7 @@ async function updateDashboard() {
         customer => {
 
             const div =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
 
             div.className =
@@ -644,24 +685,20 @@ async function updateDashboard() {
 
 
             if (
-                customer.status ===
-                "serving"
+                customer.status === "serving"
             ) {
 
                 statusClass =
                     "serving";
-
             }
 
 
             if (
-                customer.status ===
-                "served"
+                customer.status === "served"
             ) {
 
                 statusClass =
                     "served";
-
             }
 
 
@@ -714,14 +751,9 @@ async function callNext() {
     const serving =
         customers.find(
             customer =>
-                customer.status ===
-                "serving"
+                customer.status === "serving"
         );
 
-
-    /*
-       Finish current customer
-    */
 
     if (serving) {
 
@@ -729,9 +761,7 @@ async function callNext() {
             error
         } = await queueDB
 
-            .from(
-                "queue_customers"
-            )
+            .from("queue_customers")
 
             .update({
                 status: "served"
@@ -752,21 +782,14 @@ async function callNext() {
             );
 
             return;
-
         }
-
     }
 
-
-    /*
-       Find next customer
-    */
 
     const next =
         customers.find(
             customer =>
-                customer.status ===
-                "waiting"
+                customer.status === "waiting"
         );
 
 
@@ -779,21 +802,14 @@ async function callNext() {
         );
 
         return;
-
     }
 
-
-    /*
-       Start serving next customer
-    */
 
     const {
         error
     } = await queueDB
 
-        .from(
-            "queue_customers"
-        )
+        .from("queue_customers")
 
         .update({
             status: "serving"
@@ -814,7 +830,6 @@ async function callNext() {
         );
 
         return;
-
     }
 
 
@@ -839,7 +854,6 @@ async function callNext() {
 async function addDemoCustomer() {
 
     const tokens = [
-
         "B777",
         "B787",
         "A350",
@@ -848,7 +862,6 @@ async function addDemoCustomer() {
         "B737",
         "A380",
         "B747"
-
     ];
 
 
@@ -858,13 +871,10 @@ async function addDemoCustomer() {
 
     const usedTokens =
         customers
-
             .filter(
                 customer =>
-                    customer.status !==
-                    "served"
+                    customer.status !== "served"
             )
-
             .map(
                 customer =>
                     customer.token
@@ -874,9 +884,7 @@ async function addDemoCustomer() {
     let token =
         tokens.find(
             item =>
-                !usedTokens.includes(
-                    item
-                )
+                !usedTokens.includes(item)
         );
 
 
@@ -892,34 +900,27 @@ async function addDemoCustomer() {
         ) {
 
             number++;
-
         }
 
 
         token =
             `B777-${number}`;
-
     }
 
 
     /*
-       IMPORTANT:
+       Demo customer.
 
-       Demo customer belongs to the
-       currently logged-in admin user
-       for now.
-
-       We will change this when the
-       proper admin permission is added.
+       For now the admin account is
+       used as the user_id because
+       the database requires user_id.
     */
 
     const {
         error
     } = await queueDB
 
-        .from(
-            "queue_customers"
-        )
+        .from("queue_customers")
 
         .insert({
 
@@ -968,7 +969,6 @@ async function addDemoCustomer() {
         );
 
         return;
-
     }
 
 
@@ -991,9 +991,7 @@ async function resetQueue() {
 
 
     if (!confirmReset) {
-
         return;
-
     }
 
 
@@ -1009,9 +1007,7 @@ async function resetQueue() {
             error
         } = await queueDB
 
-            .from(
-                "queue_customers"
-            )
+            .from("queue_customers")
 
             .update({
                 status: "served"
@@ -1028,7 +1024,6 @@ async function resetQueue() {
             console.error(error);
 
         }
-
     }
 
 
@@ -1053,7 +1048,6 @@ async function logout() {
 
     window.location.href =
         "login.html";
-
 }
 
 
@@ -1066,7 +1060,6 @@ function goHome() {
 
     window.location.href =
         "index.html";
-
 }
 
 
@@ -1084,7 +1077,6 @@ function setupRealtime() {
         )
 
         .on(
-
             "postgres_changes",
 
             {
@@ -1100,15 +1092,12 @@ function setupRealtime() {
                     payload
                 );
 
-
                 updateDashboard();
-
             }
 
         )
 
         .subscribe();
-
 }
 
 
@@ -1119,14 +1108,12 @@ function setupRealtime() {
 
 async function startApp() {
 
-    const loggedIn =
-        await checkLogin();
+    const adminLoggedIn =
+        await checkAdminLogin();
 
 
-    if (!loggedIn) {
-
+    if (!adminLoggedIn) {
         return;
-
     }
 
 
@@ -1134,12 +1121,10 @@ async function startApp() {
 
 
     setupRealtime();
-
 }
 
 
 startApp();
-
 
 </script>
 
