@@ -4,7 +4,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>QueueLess - Login</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -131,24 +130,18 @@ button:hover{
         autocomplete="current-password"
     >
 
-    <button onclick="loginCustomer()">
+    <button id="loginButton" onclick="loginCustomer()">
         LOGIN
     </button>
 
     <div id="message" class="message"></div>
 
     <div class="register">
-
         New customer?
-
-        <a href="register.html">
-            Create an account
-        </a>
-
+        <a href="register.html">Create an account</a>
     </div>
 
 </div>
-
 
 <script>
 
@@ -158,26 +151,31 @@ const SUPABASE_URL =
 const SUPABASE_PUBLISHABLE_KEY =
     "sb_publishable_J41mt6w74FTBFBN8nj5LnQ_8ynQULAo";
 
-const queueDB =
-    window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_PUBLISHABLE_KEY
-    );
+const queueDB = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+);
 
 
 async function loginCustomer(){
 
-    const email =
-        document.getElementById("email")
-        .value
-        .trim();
+    const emailInput =
+        document.getElementById("email");
 
-    const password =
-        document.getElementById("password")
-        .value;
+    const passwordInput =
+        document.getElementById("password");
 
     const message =
         document.getElementById("message");
+
+    const button =
+        document.getElementById("loginButton");
+
+    const email =
+        emailInput.value.trim().toLowerCase();
+
+    const password =
+        passwordInput.value;
 
 
     if(!email || !password){
@@ -189,50 +187,72 @@ async function loginCustomer(){
     }
 
 
-    message.textContent =
-        "Logging in...";
+    button.disabled = true;
+
+    button.textContent = "LOGGING IN...";
+
+    message.textContent = "";
 
 
-    const { data, error } =
-        await queueDB.auth.signInWithPassword({
+    try {
 
-            email:email,
+        const { data, error } =
+            await queueDB.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
 
-            password:password
 
-        });
+        console.log("LOGIN RESULT:", data);
+        console.log("LOGIN ERROR:", error);
 
 
-    if(error){
+        if(error){
 
-        console.error(error);
+            message.textContent =
+                "Login failed: " + error.message;
+
+            button.disabled = false;
+
+            button.textContent = "LOGIN";
+
+            return;
+        }
+
+
+        if(!data || !data.session){
+
+            message.textContent =
+                "Login completed, but no session was created.";
+
+            button.disabled = false;
+
+            button.textContent = "LOGIN";
+
+            return;
+        }
+
 
         message.textContent =
-            "Login failed: " + error.message;
+            "Login successful!";
 
-        return;
-    }
-
-
-    if(!data.session){
-
-        message.textContent =
-            "Login completed, but no session was created.";
-
-        return;
-    }
-
-
-    message.textContent =
-        "Login successful!";
-
-
-    setTimeout(function(){
 
         window.location.href =
             "dashboard.html";
 
-    },800);
+    }
+
+    catch(err){
+
+        console.error("LOGIN EXCEPTION:", err);
+
+        message.textContent =
+            "Login error: " + err.message;
+
+        button.disabled = false;
+
+        button.textContent = "LOGIN";
+    }
 
 }
 
