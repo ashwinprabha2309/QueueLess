@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QueueLess Admin Login</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #0b1220;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-box {
+      width: 90%;
+      max-width: 420px;
+      background: #111827;
+      padding: 35px;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #9ca3af;
+      margin-bottom: 30px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 10px;
+      background: #1f2937;
+      color: white;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: #2563eb;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    #message {
+      text-align: center;
+      margin-top: 18px;
+      color: #f87171;
+      min-height: 20px;
+    }
+
+    .back {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: #9ca3af;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="login-box">
+    <h1>QUEUELESS ADMIN</h1>
+    <div class="subtitle">Admin Dashboard Login</div>
+
+    <input
+      type="email"
+      id="email"
+      placeholder="Admin email"
+      required
+    >
+
+    <input
+      type="password"
+      id="password"
+      placeholder="Password"
+      required
+    >
+
+    <button onclick="adminLogin()">LOGIN AS ADMIN</button>
+
+    <div id="message"></div>
+
+    <a href="login.html" class="back">
+      Customer Login
+    </a>
+  </div>
+
+  <script>
+    async function adminLogin() {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const message = document.getElementById("message");
+
+      message.textContent = "";
+
+      if (!email || !password) {
+        message.textContent = "Please enter email and password.";
+        return;
+      }
+
+      const { data, error } =
+        await queueDB.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+
+      if (error) {
+        message.textContent = error.message;
+        return;
+      }
+
+      const user = data.user;
+
+      if (user.app_metadata?.role !== "admin") {
+        await queueDB.auth.signOut();
+        message.textContent = "Access denied. Admin account required.";
+        return;
+      }
+
+      window.location.href = "admin.html";
+    }
+  </script>
+
+</body>
+</html>
