@@ -10,9 +10,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-*{
-    box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 body{
     margin:0;
@@ -98,10 +96,6 @@ button:hover{
     font-weight:bold;
     text-decoration:none;
 }
-
-#otpSection{
-    display:none;
-}
 </style>
 </head>
 
@@ -116,56 +110,32 @@ button:hover{
     <h2>Customer Login</h2>
 
     <p class="subtitle">
-        Login without a password
+        Login with your email and password
     </p>
 
+    <label>Email</label>
 
-    <!-- EMAIL -->
+    <input
+        id="email"
+        type="email"
+        placeholder="Enter your email"
+        autocomplete="email"
+    >
 
-    <div id="emailSection">
+    <label>Password</label>
 
-        <label>Email</label>
+    <input
+        id="password"
+        type="password"
+        placeholder="Enter your password"
+        autocomplete="current-password"
+    >
 
-        <input
-            id="email"
-            type="email"
-            placeholder="Enter your email"
-            autocomplete="email"
-        >
+    <button onclick="loginCustomer()">
+        LOGIN
+    </button>
 
-        <button onclick="sendCode()">
-            SEND VERIFICATION CODE
-        </button>
-
-    </div>
-
-
-    <!-- OTP -->
-
-    <div id="otpSection">
-
-        <label>Verification Code</label>
-
-        <input
-            id="otp"
-            type="text"
-            placeholder="Enter code from email"
-            maxlength="8"
-            inputmode="numeric"
-        >
-
-        <button onclick="verifyCode()">
-            VERIFY & LOGIN
-        </button>
-
-    </div>
-
-
-    <div
-        id="message"
-        class="message">
-    </div>
-
+    <div id="message" class="message"></div>
 
     <div class="register">
 
@@ -182,16 +152,11 @@ button:hover{
 
 <script>
 
-// =================================
-// SUPABASE
-// =================================
-
 const SUPABASE_URL =
     "https://bqnkuxawnksjufkjkabv.supabase.co";
 
 const SUPABASE_PUBLISHABLE_KEY =
     "sb_publishable_J41mt6w74FTBFBN8nj5LnQ_8ynQULAo";
-
 
 const queueDB =
     window.supabase.createClient(
@@ -200,113 +165,40 @@ const queueDB =
     );
 
 
-// =================================
-// SEND CODE
-// =================================
-
-async function sendCode(){
+async function loginCustomer(){
 
     const email =
         document.getElementById("email")
         .value
         .trim();
 
-    const message =
-        document.getElementById("message");
-
-
-    if(email === ""){
-
-        message.textContent =
-            "Please enter your email.";
-
-        return;
-    }
-
-
-    message.textContent =
-        "Sending verification code...";
-
-
-    const { error } =
-        await queueDB.auth.signInWithOtp({
-
-            email:email,
-
-            options:{
-                shouldCreateUser:true
-            }
-
-        });
-
-
-    if(error){
-
-        console.error(error);
-
-        message.textContent =
-            "Error: " + error.message;
-
-        return;
-    }
-
-
-    document.getElementById(
-        "emailSection"
-    ).style.display = "none";
-
-
-    document.getElementById(
-        "otpSection"
-    ).style.display = "block";
-
-
-    message.textContent =
-        "Verification code sent to your email.";
-}
-
-
-// =================================
-// VERIFY CODE
-// =================================
-
-async function verifyCode(){
-
-    const email =
-        document.getElementById("email")
-        .value
-        .trim();
-
-    const otp =
-        document.getElementById("otp")
-        .value
-        .trim();
+    const password =
+        document.getElementById("password")
+        .value;
 
     const message =
         document.getElementById("message");
 
 
-    if(otp === ""){
+    if(!email || !password){
 
         message.textContent =
-            "Please enter the verification code.";
+            "Please enter your email and password.";
 
         return;
     }
 
 
     message.textContent =
-        "Verifying...";
+        "Logging in...";
 
 
     const { data, error } =
-        await queueDB.auth.verifyOtp({
+        await queueDB.auth.signInWithPassword({
 
             email:email,
 
-            token:otp,
-
-            type:"email"
+            password:password
 
         });
 
@@ -316,8 +208,7 @@ async function verifyCode(){
         console.error(error);
 
         message.textContent =
-            "Verification failed: " +
-            error.message;
+            "Login failed: " + error.message;
 
         return;
     }
@@ -332,67 +223,6 @@ async function verifyCode(){
     }
 
 
-    // =================================
-    // GET SAVED REGISTRATION DETAILS
-    // =================================
-
-    const name =
-        localStorage.getItem("queueName");
-
-    const mobile =
-        localStorage.getItem("queueMobile");
-
-
-    // =================================
-    // GET LOGGED-IN USER
-    // =================================
-
-    const user =
-        data.session.user;
-
-
-    // =================================
-    // SAVE CUSTOMER PROFILE
-    // =================================
-
-    if(name && mobile){
-
-        const { error:profileError } =
-            await queueDB
-            .from("customer_profiles")
-            .upsert({
-
-                id:user.id,
-
-                name:name,
-
-                mobile:mobile,
-
-                email:email
-
-            });
-
-
-        if(profileError){
-
-            console.error(profileError);
-
-            message.textContent =
-                "Login successful, but profile could not be saved: " +
-                profileError.message;
-
-            return;
-        }
-
-
-        // Details are now permanently stored.
-        localStorage.removeItem("queueName");
-        localStorage.removeItem("queueMobile");
-        localStorage.removeItem("queueEmail");
-
-    }
-
-
     message.textContent =
         "Login successful!";
 
@@ -402,7 +232,7 @@ async function verifyCode(){
         window.location.href =
             "dashboard.html";
 
-    },1000);
+    },800);
 
 }
 
