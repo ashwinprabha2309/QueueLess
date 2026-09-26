@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>QueueLess - My Queue</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #666;
+        }
+
+        .card {
+            background: white;
+            border-radius: 18px;
+            padding: 25px;
+            margin-bottom: 18px;
+            box-shadow: 0 6px 25px rgba(0,0,0,0.08);
+        }
+
+        .token {
+            text-align: center;
+            font-size: 48px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .token-label {
+            text-align: center;
+            color: #666;
+        }
+
+        .place {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .info {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .info-box {
+            flex: 1;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .info-box strong {
+            display: block;
+            font-size: 20px;
+            margin-top: 5px;
+        }
+
+        .status {
+            text-align: center;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        .waiting {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .serving {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .served {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .blue {
+            background: #2563eb;
+            color: white;
+        }
+
+        .green {
+            background: #16a34a;
+            color: white;
+        }
+
+        .dark {
+            background: #111827;
+            color: white;
+        }
+
+        .orange {
+            background: #ea580c;
+            color: white;
+        }
+
+        .gray {
+            background: #6b7280;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .activity-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .activity-grid button {
+            margin-top: 0;
+            font-size: 14px;
+        }
+
+        .arrival {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+
+        .arrival strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .small {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        #loading {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .account-button {
+            margin-top: 0;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+
+        <h1>✈️ QueueLess</h1>
+
+        <p>
+            Your queue, without the waiting.
+        </p>
+
+    </div>
+
+
+    <!-- LOADING -->
+
+    <div id="loading">
+        Loading your queue...
+    </div>
+
+
+    <!-- MAIN CONTENT -->
+
+    <div id="mainContent" class="hidden">
+
+
+        <!-- TOKEN -->
+
+        <div class="card">
+
+            <div class="token-label">
+                YOUR QUEUE TOKEN
+            </div>
+
+            <div
+                class="token"
+                id="token"
+            >
+                ---
+            </div>
+
+            <div
+                class="place"
+                id="place"
+            >
+                ---
+            </div>
+
+
+            <div
+                id="statusBox"
+                class="status waiting"
+            >
+                ⏳ Waiting
+            </div>
+
+
+            <!-- QUEUE INFO -->
+
+            <div class="info">
+
+                <div class="info-box">
+
+                    Estimated Wait
+
+                    <strong id="wait">
+                        --
+                    </strong>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    Your Turn
+
+                    <strong id="turnTime">
+                        --
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- SMART ARRIVAL -->
+
+            <div class="arrival">
+
+                <strong>
+                    🧠 Smart Arrival
+                </strong>
+
+                <div id="arrivalText">
+                    Calculating your recommended arrival...
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- QUEUE LOCATION -->
+
+        <div class="card">
+
+            <h2>
+                📍 Queue Location
+            </h2>
+
+            <p id="destinationAddress">
+                Loading destination...
+            </p>
+
+
+            <button
+                class="blue"
+                onclick="goToQueueLocation()"
+            >
+                🗺️ GET DIRECTIONS TO QUEUE
+            </button>
+
+
+            <button
+                class="orange"
+                onclick="goBackToQueue()"
+            >
+                🔙 GET DIRECTIONS BACK
+            </button>
+
+
+            <p class="small">
+
+                Google Maps will use your current location
+                and show the route to the business.
+
+            </p>
+
+        </div>
+
+
+
+        <!-- WHAT TO DO -->
+
+        <div class="card">
+
+            <h2>
+                🕒 What would you like to do while waiting?
+            </h2>
+
+            <div class="activity-grid">
+
+                <button
+                    class="blue"
+                    onclick="openNearby('cafe')"
+                >
+                    ☕ Cafés
+                </button>
+
+                <button
+                    class="orange"
+                    onclick="openNearby('restaurant')"
+                >
+                    🍔 Food
+                </button>
+
+                <button
+                    class="green"
+                    onclick="openNearby('shops')"
+                >
+                    🛍 Shops
+                </button>
+
+                <button
+                    class="gray"
+                    onclick="openNearby('parks')"
+                >
+                    🌳 Parks
+                </button>
+
+                <button
+                    class="blue"
+                    onclick="openNearby('study')"
+                >
+                    📚 Study
+                </button>
+
+                <button
+                    class="dark"
+                    onclick="openNearby('work')"
+                >
+                    💻 Work
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- LIVE MAP -->
+
+        <div class="card">
+
+            <h2>
+                🗺️ Live Nearby Search
+            </h2>
+
+            <p class="small">
+
+                Explore nearby places while you wait.
+                Google Maps can show live travel information.
+
+            </p>
+
+
+            <button
+                class="blue"
+                onclick="openNearby('all')"
+            >
+                📍 EXPLORE PLACES NEAR ME
+            </button>
+
+        </div>
+
+
+
+        <!-- EMAIL -->
+
+        <div class="card">
+
+            <h2>
+                📧 Reminder
+            </h2>
+
+            <p id="emailText">
+                Your reminder will appear here.
+            </p>
+
+
+            <button
+                class="dark"
+                onclick="showEmailReminder()"
+            >
+                📧 SHOW EMAIL REMINDER
+            </button>
+
+        </div>
+
+
+
+        <!-- ACCOUNT -->
+
+        <div class="card">
+
+            <button
+                class="blue account-button"
+                onclick="goToDashboard()"
+            >
+                👤 MY QUEUES
+            </button>
+
+
+            <button
+                class="green account-button"
+                onclick="joinAnotherQueue()"
+            >
+                ➕ JOIN ANOTHER QUEUE
+            </button>
+
+
+            <button
+                class="gray account-button"
+                onclick="logout()"
+            >
+                🚪 LOG OUT
+            </button>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+
+<!-- SUPABASE -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="supabase.js"></script>
+
+
+<script>
+
+
+/* =========================
+   GLOBAL VARIABLES
+========================= */
+
+let selectedQueueId =
+    localStorage.getItem("selectedQueueId");
+
+let currentUser = null;
+
+let currentCustomer = null;
+
+let customerProfile = null;
+
+let realtimeChannel = null;
+
+
+
+/* =========================
+   LOAD LOGGED-IN USER
+========================= */
+
+async function checkLogin() {
+
+    const {
+        data,
+        error
+    } = await queueDB.auth.getUser();
+
+
+    if (
+        error ||
+        !data ||
+        !data.user
+    ) {
+
+        window.location.href =
+            "login.html";
+
+        return false;
+
+    }
+
+
+    currentUser =
+        data.user;
+
+
+    return true;
+
+}
+
+
+
+/* =========================
+   LOAD CUSTOMER PROFILE
+========================= */
+
+async function loadProfile() {
+
+    const {
+        data,
+        error
+    } = await queueDB
+
+        .from("customer_profiles")
+
+        .select("*")
+
+        .eq(
+            "id",
+            currentUser.id
+        )
+
+        .maybeSingle();
+
+
+    if (error) {
+
+        console.error(
+            "Profile error:",
+            error
+        );
+
+        return;
+
+    }
+
+
+    customerProfile =
+        data;
+
+}
+
+
+
+/* =========================
+   LOAD QUEUE
+========================= */
+
+async function loadQueue() {
+
+    if (!selectedQueueId) {
+
+        alert(
+            "No queue selected."
+        );
+
+        window.location.href =
+            "dashboard.html";
+
+        return;
+
+    }
+
+
+    const {
+        data,
+        error
+    } = await queueDB
+
+        .from("queue_customers")
+
+        .select("*")
+
+        .eq(
+            "id",
+            selectedQueueId
+        )
+
+        .eq(
+            "user_id",
+            currentUser.id
+        )
+
+        .single();
+
+
+    if (error) {
+
+        console.error(
+            "Queue loading error:",
+            error
+        );
+
+
+        document.getElementById(
+            "loading"
+        ).innerText =
+            "Unable to load your queue.";
+
+
+        return;
+
+    }
+
+
+    if (!data) {
+
+        document.getElementById(
+            "loading"
+        ).innerText =
+            "Queue not found.";
+
+
+        return;
+
+    }
+
+
+    currentCustomer =
+        data;
+
+
+    displayQueue(data);
+
+}
+
+
+
+/* =========================
+   DISPLAY QUEUE
+========================= */
+
+function displayQueue(customer) {
+
+    document.getElementById(
+        "loading"
+    ).classList.add("hidden");
+
+
+    document.getElementById(
+        "mainContent"
+    ).classList.remove("hidden");
+
+
+    document.getElementById(
+        "token"
+    ).innerText =
+        customer.token;
+
+
+    document.getElementById(
+        "place"
+    ).innerText =
+        customer.place;
+
+
+    document.getElementById(
+        "destinationAddress"
+    ).innerText =
+        customer.destination_address ||
+        customer.place;
+
+
+    const statusBox =
+        document.getElementById(
+            "statusBox"
+        );
+
+
+    /*
+       SERVING
+    */
+
+    if (
+        customer.status ===
+        "serving"
+    ) {
+
+        statusBox.className =
+            "status serving";
+
+        statusBox.innerText =
+            "🚨 YOUR TURN — PLEASE PROCEED";
+
+
+        document.getElementById(
+            "wait"
+        ).innerText =
+            "NOW";
+
+
+        document.getElementById(
+            "turnTime"
+        ).innerText =
+            "NOW";
+
+
+        document.getElementById(
+            "arrivalText"
+        ).innerHTML =
+
+            "<strong>It's your turn!</strong>" +
+
+            "<br><br>" +
+
+            "Please proceed to " +
+
+            customer.place +
+
+            ".";
+
+    }
+
+
+    /*
+       SERVED
+    */
+
+    else if (
+        customer.status ===
+        "served"
+    ) {
+
+        statusBox.className =
+            "status served";
+
+        statusBox.innerText =
+            "✅ SERVED";
+
+
+        document.getElementById(
+            "wait"
+        ).innerText =
+            "DONE";
+
+
+        document.getElementById(
+            "turnTime"
+        ).innerText =
+            "DONE";
+
+
+        document.getElementById(
+            "arrivalText"
+        ).innerText =
+            "Your queue session has finished.";
+
+    }
+
+
+    /*
+       WAITING
+    */
+
+    else {
+
+        statusBox.className =
+            "status waiting";
+
+        statusBox.innerText =
+            "⏳ WAITING";
+
+
+        calculateTurnTime(
+            customer
+        );
+
+    }
+
+}
+
+
+
+/* =========================
+   CALCULATE TURN TIME
+========================= */
+
+function calculateTurnTime(customer) {
+
+    const joinedTime =
+        new Date(
+            customer.joined_at
+        );
+
+
+    const waitMinutes =
+        Number(
+            customer.wait || 25
+        );
+
+
+    const turnTime =
+        new Date(
+            joinedTime.getTime() +
+            waitMinutes * 60000
+        );
+
+
+    const now =
+        new Date();
+
+
+    let remaining =
+        Math.max(
+            0,
+            Math.ceil(
+                (
+                    turnTime -
+                    now
+                ) / 60000
+            )
+        );
+
+
+    if (remaining <= 0) {
+
+        remaining = 1;
+
+    }
+
+
+    document.getElementById(
+        "wait"
+    ).innerText =
+        remaining +
+        " min";
+
+
+    document.getElementById(
+        "turnTime"
+    ).innerText =
+
+        turnTime.toLocaleTimeString(
+            [],
+            {
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+
+
+    document.getElementById(
+        "arrivalText"
+    ).innerHTML =
+
+        "Your estimated turn is around " +
+
+        "<strong>" +
+
+        turnTime.toLocaleTimeString(
+            [],
+            {
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        ) +
+
+        "</strong>." +
+
+        "<br><br>" +
+
+        "Check Google Maps for live travel time " +
+
+        "before returning.";
+
+}
+
+
+
+/* =========================
+   GOOGLE MAPS — QUEUE
+========================= */
+
+function goToQueueLocation() {
+
+    if (!currentCustomer) {
+
+        return;
+
+    }
+
+
+    const lat =
+        currentCustomer.destination_lat;
+
+    const lng =
+        currentCustomer.destination_lng;
+
+
+    let destination;
+
+
+    if (
+        lat !== null &&
+        lat !== undefined &&
+        lng !== null &&
+        lng !== undefined
+    ) {
+
+        destination =
+            lat +
+            "," +
+            lng;
+
+    }
+
+    else {
+
+        destination =
+            currentCustomer.destination_address ||
+            currentCustomer.place;
+
+    }
+
+
+    const url =
+        "https://www.google.com/maps/dir/?api=1" +
+        "&destination=" +
+        encodeURIComponent(
+            destination
+        );
+
+
+    window.open(
+        url,
+        "_blank"
+    );
+
+}
+
+
+
+/* =========================
+   GOOGLE MAPS — BACK
+========================= */
+
+function goBackToQueue() {
+
+    goToQueueLocation();
+
+}
+
+
+
+/* =========================
+   NEARBY PLACES
+========================= */
+
+function openNearby(type) {
+
+    let query;
+
+
+    switch (type) {
+
+        case "cafe":
+
+            query =
+                "cafes near me";
+
+            break;
+
+
+        case "restaurant":
+
+            query =
+                "restaurants near me";
+
+            break;
+
+
+        case "shops":
+
+            query =
+                "shops near me";
+
+            break;
+
+
+        case "parks":
+
+            query =
+                "parks near me";
+
+            break;
+
+
+        case "study":
+
+            query =
+                "study places near me";
+
+            break;
+
+
+        case "work":
+
+            query =
+                "coworking spaces near me";
+
+            break;
+
+
+        default:
+
+            query =
+                "places near me";
+
+    }
+
+
+    const url =
+        "https://www.google.com/maps/search/?api=1" +
+        "&query=" +
+        encodeURIComponent(
+            query
+        );
+
+
+    window.open(
+        url,
+        "_blank"
+    );
+
+}
+
+
+
+/* =========================
+   EMAIL REMINDER
+========================= */
+
+function showEmailReminder() {
+
+    let email = "";
+
+    let name = "";
+
+
+    if (customerProfile) {
+
+        email =
+            customerProfile.email ||
+            "";
+
+        name =
+            customerProfile.name ||
+            "";
+
+    }
+
+
+    if (!email) {
+
+        email =
+            currentUser.email ||
+            "";
+
+    }
+
+
+    if (!name) {
+
+        name =
+            "Customer";
+
+    }
+
+
+    if (!email) {
+
+        alert(
+            "No email address was found."
+        );
+
+        return;
+
+    }
+
+
+    const turn =
+        document.getElementById(
+            "turnTime"
+        ).innerText;
+
+
+    document.getElementById(
+        "emailText"
+    ).innerHTML =
+
+        "📧 Reminder preview for " +
+
+        "<strong>" +
+
+        name +
+
+        "</strong>" +
+
+        "<br><br>" +
+
+        "To: " +
+
+        email +
+
+        "<br>" +
+
+        "Subject: QueueLess Reminder ✈️" +
+
+        "<br><br>" +
+
+        "Your token is " +
+
+        "<strong>" +
+
+        currentCustomer.token +
+
+        "</strong>." +
+
+        "<br>" +
+
+        "Your estimated turn time is " +
+
+        "<strong>" +
+
+        turn +
+
+        "</strong>.";
+
+}
+
+
+
+/* =========================
+   DASHBOARD
+========================= */
+
+function goToDashboard() {
+
+    window.location.href =
+        "dashboard.html";
+
+}
+
+
+
+/* =========================
+   JOIN ANOTHER QUEUE
+========================= */
+
+function joinAnotherQueue() {
+
+    window.location.href =
+        "location.html";
+
+}
+
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+async function logout() {
+
+    await queueDB.auth.signOut();
+
+    localStorage.removeItem(
+        "selectedQueueId"
+    );
+
+    localStorage.removeItem(
+        "myQueueId"
+    );
+
+    localStorage.removeItem(
+        "myToken"
+    );
+
+    window.location.href =
+        "login.html";
+
+}
+
+
+
+/* =========================
+   REALTIME
+========================= */
+
+function setupRealtime() {
+
+    if (!selectedQueueId) {
+
+        return;
+
+    }
+
+
+    realtimeChannel =
+        queueDB
+
+            .channel(
+                "customer-queue-" +
+                selectedQueueId
+            )
+
+            .on(
+
+                "postgres_changes",
+
+                {
+
+                    event: "*",
+
+                    schema: "public",
+
+                    table:
+                        "queue_customers",
+
+                    filter:
+                        "id=eq." +
+                        selectedQueueId
+
+                },
+
+                function(payload) {
+
+                    console.log(
+                        "Queue updated:",
+                        payload
+                    );
+
+
+                    /*
+                       UPDATE
+                    */
+
+                    if (
+                        payload.eventType ===
+                        "UPDATE" &&
+                        payload.new
+                    ) {
+
+                        /*
+                           Security check:
+                           only display if it
+                           belongs to current user.
+                        */
+
+                        if (
+                            payload.new.user_id ===
+                            currentUser.id
+                        ) {
+
+                            currentCustomer =
+                                payload.new;
+
+
+                            displayQueue(
+                                payload.new
+                            );
+
+                        }
+
+                    }
+
+
+                    /*
+                       INSERT
+                    */
+
+                    else if (
+                        payload.eventType ===
+                        "INSERT" &&
+                        payload.new
+                    ) {
+
+                        if (
+                            payload.new.user_id ===
+                            currentUser.id
+                        ) {
+
+                            currentCustomer =
+                                payload.new;
+
+
+                            displayQueue(
+                                payload.new
+                            );
+
+                        }
+
+                    }
+
+                }
+
+            )
+
+            .subscribe();
+
+}
+
+
+
+/* =========================
+   AUTO REFRESH
+========================= */
+
+setInterval(
+
+    function() {
+
+        if (
+            currentCustomer &&
+            currentCustomer.status ===
+            "waiting"
+        ) {
+
+            calculateTurnTime(
+                currentCustomer
+            );
+
+        }
+
+    },
+
+    30000
+
+);
+
+
+
+/* =========================
+   START APPLICATION
+========================= */
+
+async function startApp() {
+
+    const loggedIn =
+        await checkLogin();
+
+
+    if (!loggedIn) {
+
+        return;
+
+    }
+
+
+    await loadProfile();
+
+
+    await loadQueue();
+
+
+    setupRealtime();
+
+}
+
+
+startApp();
+
+
+</script>
+
+</body>
+</html>

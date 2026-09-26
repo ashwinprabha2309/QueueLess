@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QueueLess - Registration</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#eef4ff;
+}
+
+.container{
+    max-width:600px;
+    margin:50px auto;
+    background:white;
+    padding:40px;
+    border-radius:22px;
+    box-shadow:0 10px 30px rgba(0,0,0,.12);
+}
+
+.logo{
+    text-align:center;
+    color:#1769e0;
+    font-size:32px;
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
+h2{
+    text-align:center;
+}
+
+.subtitle{
+    text-align:center;
+    color:#666;
+    margin-bottom:30px;
+}
+
+label{
+    display:block;
+    margin-top:18px;
+    font-weight:bold;
+}
+
+input{
+    width:100%;
+    padding:14px;
+    margin-top:8px;
+    border:1px solid #ccc;
+    border-radius:10px;
+    font-size:16px;
+}
+
+button{
+    width:100%;
+    padding:15px;
+    margin-top:28px;
+    border:0;
+    border-radius:10px;
+    background:#1769e0;
+    color:white;
+    font-size:17px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#0d52b8;
+}
+
+.error{
+    color:#d00;
+    text-align:center;
+    margin-top:15px;
+}
+
+.success{
+    color:#148a35;
+    text-align:center;
+    margin-top:15px;
+}
+
+.login{
+    text-align:center;
+    margin-top:20px;
+}
+
+.login a{
+    color:#1769e0;
+    font-weight:bold;
+    text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="logo">QUEUELESS ✈️</div>
+
+    <h2>Create Your Account</h2>
+
+    <p class="subtitle">
+        Register once and manage all your queues
+    </p>
+
+    <label>Full Name</label>
+    <input
+        id="name"
+        type="text"
+        placeholder="Enter your name"
+        autocomplete="name"
+    >
+
+    <label>Mobile Number</label>
+    <input
+        id="mobile"
+        type="tel"
+        placeholder="Enter mobile number"
+        autocomplete="tel"
+    >
+
+    <label>Email</label>
+    <input
+        id="email"
+        type="email"
+        placeholder="Enter email address"
+        autocomplete="email"
+    >
+
+    <button onclick="registerCustomer()">
+        CONTINUE
+    </button>
+
+    <div id="message"></div>
+
+    <div class="login">
+        Already have an account?
+        <a href="login.html">Login</a>
+    </div>
+
+</div>
+
+
+<script>
+
+// ================================
+// SUPABASE
+// ================================
+
+const SUPABASE_URL =
+    "https://bqnkuxawnksjufkjkabv.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_J41mt6w74FTBFBN8nj5LnQ_8ynQULAo";
+
+
+const queueDB = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+);
+
+
+// ================================
+// REGISTER CUSTOMER
+// ================================
+
+async function registerCustomer(){
+
+    const name =
+        document.getElementById("name").value.trim();
+
+    const mobile =
+        document.getElementById("mobile").value.trim();
+
+    const email =
+        document.getElementById("email").value.trim();
+
+    const message =
+        document.getElementById("message");
+
+
+    // CHECK DETAILS
+
+    if(
+        name === "" ||
+        mobile === "" ||
+        email === ""
+    ){
+
+        message.className = "error";
+
+        message.textContent =
+            "Please fill in all the details.";
+
+        return;
+    }
+
+
+    // BASIC MOBILE CHECK
+
+    if(mobile.length < 10){
+
+        message.className = "error";
+
+        message.textContent =
+            "Please enter a valid mobile number.";
+
+        return;
+    }
+
+
+    message.className = "success";
+
+    message.textContent =
+        "Sending verification code...";
+
+
+    // SAVE CUSTOMER DETAILS LOCALLY
+    // They will be attached to the account
+    // after email verification.
+
+    localStorage.setItem(
+        "queueName",
+        name
+    );
+
+    localStorage.setItem(
+        "queueMobile",
+        mobile
+    );
+
+    localStorage.setItem(
+        "queueEmail",
+        email
+    );
+
+
+    // SEND EMAIL VERIFICATION
+
+    const { error } =
+        await queueDB.auth.signInWithOtp({
+
+            email: email,
+
+            options: {
+                shouldCreateUser: true
+            }
+
+        });
+
+
+    if(error){
+
+        console.error(error);
+
+        message.className = "error";
+
+        message.textContent =
+            "Error: " + error.message;
+
+        return;
+    }
+
+
+    message.className = "success";
+
+    message.textContent =
+        "Verification code sent to your email!";
+
+
+    // GO TO LOGIN PAGE
+
+    setTimeout(function(){
+
+        window.location.href =
+            "login.html";
+
+    }, 1200);
+
+}
+
+</script>
+
+</body>
+</html>

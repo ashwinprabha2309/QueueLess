@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>QueueLess - Location</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 60px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 18px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        p {
+            text-align: center;
+            color: #666;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            margin-top: 20px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .location-btn {
+            background: #111;
+            color: white;
+        }
+
+        .continue-btn {
+            background: #2563eb;
+            color: white;
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 15px;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>📍 Your Location</h1>
+
+    <p>
+        Tell QueueLess where you are so we can help you find nearby places.
+    </p>
+
+    <input
+        type="text"
+        id="locationInput"
+        placeholder="Enter city or area"
+    >
+
+    <button
+        class="location-btn"
+        onclick="useMyLocation()"
+    >
+        📍 USE MY LOCATION
+    </button>
+
+    <button
+        class="continue-btn"
+        onclick="continueLocation()"
+    >
+        CONTINUE →
+    </button>
+
+    <div class="status" id="status"></div>
+
+</div>
+
+<script>
+
+let latitude = null;
+let longitude = null;
+
+function useMyLocation() {
+
+    const status = document.getElementById("status");
+
+    if (!navigator.geolocation) {
+        status.innerText = "Geolocation is not supported by your browser.";
+        return;
+    }
+
+    status.innerText = "📍 Getting your location...";
+
+    navigator.geolocation.getCurrentPosition(
+
+        function(position) {
+
+            latitude = position.coords.latitude;
+            longitude = position.coords.longitude;
+
+            localStorage.setItem(
+                "queueLatitude",
+                latitude
+            );
+
+            localStorage.setItem(
+                "queueLongitude",
+                longitude
+            );
+
+            localStorage.setItem(
+                "locationType",
+                "gps"
+            );
+
+            localStorage.setItem(
+                "queueLocation",
+                "Current Location"
+            );
+
+            status.innerText =
+                "✅ Location detected successfully!";
+
+        },
+
+        function(error) {
+
+            console.error(error);
+
+            status.innerText =
+                "❌ Could not access location. Please enter your area manually.";
+
+        }
+
+    );
+}
+
+
+function continueLocation() {
+
+    const input =
+        document.getElementById("locationInput").value.trim();
+
+    if (input !== "") {
+
+        localStorage.setItem(
+            "queueLocation",
+            input
+        );
+
+        localStorage.setItem(
+            "locationType",
+            "manual"
+        );
+
+    }
+
+    if (
+        !localStorage.getItem("queueLocation")
+    ) {
+
+        alert("Please enter your location or use GPS.");
+
+        return;
+    }
+
+    window.location.href = "services.html";
+}
+
+</script>
+
+</body>
+</html>

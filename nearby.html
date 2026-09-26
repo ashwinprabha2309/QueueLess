@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QueueLess - Nearby</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#eef4ff;
+}
+
+.container{
+    max-width:800px;
+    margin:40px auto;
+    padding:25px;
+}
+
+.logo{
+    text-align:center;
+    color:#1769e0;
+    font-size:35px;
+    font-weight:bold;
+}
+
+.subtitle{
+    text-align:center;
+    color:#666;
+}
+
+.place{
+    background:white;
+    padding:22px;
+    margin-top:15px;
+    border-radius:15px;
+    box-shadow:0 5px 20px rgba(0,0,0,.08);
+}
+
+.place h3{
+    margin:0 0 8px;
+}
+
+.place p{
+    color:#666;
+}
+
+button{
+    padding:12px 18px;
+    border:0;
+    border-radius:9px;
+    background:#1769e0;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    margin-right:8px;
+}
+
+.back{
+    background:#222;
+    margin-top:25px;
+    width:100%;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="logo">
+        QUEUELESS ✈️
+    </div>
+
+    <p class="subtitle" id="title">
+        Nearby places
+    </p>
+
+
+    <div class="place">
+
+        <h3>☕ Popular Café</h3>
+
+        <p>
+            Approx. 400 m • 5 min walk
+        </p>
+
+        <button onclick="directions('cafe')">
+            GET DIRECTIONS
+        </button>
+
+    </div>
+
+
+    <div class="place">
+
+        <h3>🍔 Food Restaurant</h3>
+
+        <p>
+            Approx. 700 m • 9 min walk
+        </p>
+
+        <button onclick="directions('restaurant')">
+            GET DIRECTIONS
+        </button>
+
+    </div>
+
+
+    <div class="place">
+
+        <h3>🛍️ Shopping Area</h3>
+
+        <p>
+            Approx. 1.2 km • 15 min walk
+        </p>
+
+        <button onclick="directions('shops')">
+            GET DIRECTIONS
+        </button>
+
+    </div>
+
+
+    <div class="place">
+
+        <h3>🌳 Public Park</h3>
+
+        <p>
+            Approx. 900 m • 11 min walk
+        </p>
+
+        <button onclick="directions('park')">
+            GET DIRECTIONS
+        </button>
+
+    </div>
+
+
+    <div class="place">
+
+        <h3>📚 Study / Work Space</h3>
+
+        <p>
+            Approx. 600 m • 8 min walk
+        </p>
+
+        <button onclick="directions('study')">
+            GET DIRECTIONS
+        </button>
+
+    </div>
+
+
+    <button class="back" onclick="backToQueue()">
+        ← BACK TO MY QUEUE
+    </button>
+
+</div>
+
+
+<script>
+
+const destination =
+    localStorage.getItem("queuePlace")
+    || "destination";
+
+
+document.getElementById("title").textContent =
+    "Nearby places while waiting for " +
+    destination;
+
+
+
+function directions(search){
+
+    const location =
+        localStorage.getItem("queueLocation")
+        || destination;
+
+
+    let query = search;
+
+
+    if(search === "cafe"){
+        query = "cafes near " + location;
+    }
+
+    if(search === "restaurant"){
+        query = "restaurants near " + location;
+    }
+
+    if(search === "shops"){
+        query = "shops near " + location;
+    }
+
+    if(search === "park"){
+        query = "parks near " + location;
+    }
+
+    if(search === "study"){
+        query = "study spaces near " + location;
+    }
+
+
+    const url =
+        "https://www.google.com/maps/search/?api=1&query=" +
+        encodeURIComponent(query);
+
+
+    window.open(url, "_blank");
+
+}
+
+
+
+function backToQueue(){
+
+    window.location.href =
+        "queue.html";
+
+}
+
+</script>
+
+</body>
+</html>

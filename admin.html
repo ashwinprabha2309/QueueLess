@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>QueueLess - Admin Dashboard</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        .header {
+            background: #111827;
+            color: white;
+            padding: 25px;
+            border-radius: 18px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .header p {
+            margin-bottom: 0;
+            color: #d1d5db;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow:
+                0 5px 20px
+                rgba(0,0,0,0.08);
+        }
+
+        .stat-title {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .stat-value {
+            font-size: 30px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow:
+                0 5px 20px
+                rgba(0,0,0,0.08);
+        }
+
+        .current {
+            text-align: center;
+        }
+
+        .current-token {
+            font-size: 50px;
+            font-weight: bold;
+            margin: 10px;
+        }
+
+        .current-name {
+            font-size: 20px;
+            color: #555;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .next-btn {
+            background: #16a34a;
+            color: white;
+        }
+
+        .add-btn {
+            background: #2563eb;
+            color: white;
+        }
+
+        .reset-btn {
+            background: #dc2626;
+            color: white;
+        }
+
+        .home-btn {
+            background: #6b7280;
+            color: white;
+        }
+
+        .logout-btn {
+            background: #111827;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .customer {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 10px;
+        }
+
+        .customer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .token {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .customer-name {
+            margin-top: 5px;
+        }
+
+        .customer-place {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .customer-status {
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .waiting {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .serving {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .served {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .empty {
+            text-align: center;
+            color: #777;
+            padding: 20px;
+        }
+
+        .live {
+            color: #16a34a;
+            font-weight: bold;
+        }
+
+        .error-box {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        @media (max-width: 700px) {
+
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <!-- HEADER -->
+
+    <div class="header">
+
+        <h1>
+            ✈️ QueueLess Admin
+        </h1>
+
+        <p>
+            Live Queue Management Dashboard
+        </p>
+
+        <p class="live">
+            ● LIVE
+        </p>
+
+    </div>
+
+
+    <div
+        id="errorBox"
+        class="error-box"
+    >
+    </div>
+
+
+
+    <!-- STATISTICS -->
+
+    <div class="dashboard">
+
+        <div class="stat">
+
+            <div class="stat-title">
+                NOW SERVING
+            </div>
+
+            <div
+                class="stat-value"
+                id="nowServing"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <div class="stat">
+
+            <div class="stat-title">
+                NEXT CUSTOMER
+            </div>
+
+            <div
+                class="stat-value"
+                id="nextCustomer"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <div class="stat">
+
+            <div class="stat-title">
+                WAITING
+            </div>
+
+            <div
+                class="stat-value"
+                id="waitingCount"
+            >
+                0
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- CURRENT CUSTOMER -->
+
+    <div class="card current">
+
+        <h2>
+            👤 Currently Serving
+        </h2>
+
+
+        <div
+            class="current-token"
+            id="currentToken"
+        >
+            —
+        </div>
+
+
+        <div
+            class="current-name"
+            id="currentName"
+        >
+            No customer
+        </div>
+
+
+        <div id="currentPlace">
+        </div>
+
+
+        <button
+            class="next-btn"
+            onclick="callNext()"
+        >
+            📢 CALL NEXT CUSTOMER
+        </button>
+
+    </div>
+
+
+
+    <!-- ACTIONS -->
+
+    <div class="card">
+
+        <h2>
+            ⚙️ Queue Controls
+        </h2>
+
+
+        <button
+            class="add-btn"
+            onclick="addDemoCustomer()"
+        >
+            ➕ ADD DEMO CUSTOMER
+        </button>
+
+
+        <button
+            class="reset-btn"
+            onclick="resetQueue()"
+        >
+            🗑️ RESET QUEUE
+        </button>
+
+
+        <button
+            class="home-btn"
+            onclick="goHome()"
+        >
+            🏠 HOME
+        </button>
+
+
+        <button
+            class="logout-btn"
+            onclick="logout()"
+        >
+            🚪 LOG OUT
+        </button>
+
+    </div>
+
+
+
+    <!-- CUSTOMER LIST -->
+
+    <div class="card">
+
+        <h2>
+            👥 Live Queue
+        </h2>
+
+
+        <div id="queueList">
+
+            Loading queue...
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+
+<!-- SUPABASE -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="supabase.js"></script>
+
+
+<script>
+
+
+let currentUser = null;
+
+
+/* =========================
+   SHOW ERROR
+========================= */
+
+function showError(message) {
+
+    const box =
+        document.getElementById(
+            "errorBox"
+        );
+
+    box.innerText =
+        message;
+
+    box.style.display =
+        "block";
+
+}
+
+
+
+/* =========================
+   CHECK LOGIN
+========================= */
+
+async function checkLogin() {
+
+    const {
+        data,
+        error
+    } = await queueDB.auth.getUser();
+
+
+    if (
+        error ||
+        !data ||
+        !data.user
+    ) {
+
+        window.location.href =
+            "login.html";
+
+        return false;
+
+    }
+
+
+    currentUser =
+        data.user;
+
+
+    return true;
+
+}
+
+
+
+/* =========================
+   GET CUSTOMERS
+========================= */
+
+async function getCustomers() {
+
+    const {
+        data,
+        error
+    } = await queueDB
+
+        .from("queue_customers")
+
+        .select("*")
+
+        .order(
+            "joined_at",
+            {
+                ascending: true
+            }
+        );
+
+
+    if (error) {
+
+        console.error(
+            "Queue error:",
+            error
+        );
+
+
+        showError(
+            "Admin access is not configured yet. We need to add the admin permission in Supabase."
+        );
+
+
+        return [];
+
+    }
+
+
+    return data || [];
+
+}
+
+
+
+/* =========================
+   UPDATE DASHBOARD
+========================= */
+
+async function updateDashboard() {
+
+    const customers =
+        await getCustomers();
+
+
+    const serving =
+        customers.find(
+            customer =>
+                customer.status ===
+                "serving"
+        );
+
+
+    const waiting =
+        customers.filter(
+            customer =>
+                customer.status ===
+                "waiting"
+        );
+
+
+    document.getElementById(
+        "nowServing"
+    ).innerText =
+
+        serving
+        ? serving.token
+        : "—";
+
+
+    document.getElementById(
+        "currentToken"
+    ).innerText =
+
+        serving
+        ? serving.token
+        : "—";
+
+
+    document.getElementById(
+        "currentName"
+    ).innerText =
+
+        serving
+        ? serving.name
+        : "No customer";
+
+
+    document.getElementById(
+        "currentPlace"
+    ).innerText =
+
+        serving
+        ? serving.place
+        : "";
+
+
+    document.getElementById(
+        "nextCustomer"
+    ).innerText =
+
+        waiting.length > 0
+        ? waiting[0].token
+        : "—";
+
+
+    document.getElementById(
+        "waitingCount"
+    ).innerText =
+        waiting.length;
+
+
+    const list =
+        document.getElementById(
+            "queueList"
+        );
+
+
+    if (customers.length === 0) {
+
+        list.innerHTML =
+            '<div class="empty">' +
+            'No customers in queue.' +
+            '</div>';
+
+        return;
+
+    }
+
+
+    list.innerHTML = "";
+
+
+    customers.forEach(
+        customer => {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+
+            div.className =
+                "customer";
+
+
+            let statusClass =
+                "waiting";
+
+
+            if (
+                customer.status ===
+                "serving"
+            ) {
+
+                statusClass =
+                    "serving";
+
+            }
+
+
+            if (
+                customer.status ===
+                "served"
+            ) {
+
+                statusClass =
+                    "served";
+
+            }
+
+
+            div.innerHTML = `
+
+                <div class="customer-header">
+
+                    <div class="token">
+                        ✈️ ${customer.token}
+                    </div>
+
+                    <div
+                        class="customer-status ${statusClass}"
+                    >
+                        ${customer.status.toUpperCase()}
+                    </div>
+
+                </div>
+
+                <div class="customer-name">
+                    👤 ${customer.name}
+                </div>
+
+                <div class="customer-place">
+                    📍 ${customer.place}
+                </div>
+
+            `;
+
+
+            list.appendChild(div);
+
+        }
+    );
+
+}
+
+
+
+/* =========================
+   CALL NEXT
+========================= */
+
+async function callNext() {
+
+    const customers =
+        await getCustomers();
+
+
+    const serving =
+        customers.find(
+            customer =>
+                customer.status ===
+                "serving"
+        );
+
+
+    /*
+       Finish current customer
+    */
+
+    if (serving) {
+
+        const {
+            error
+        } = await queueDB
+
+            .from(
+                "queue_customers"
+            )
+
+            .update({
+                status: "served"
+            })
+
+            .eq(
+                "id",
+                serving.id
+            );
+
+
+        if (error) {
+
+            console.error(error);
+
+            alert(
+                "Could not update current customer."
+            );
+
+            return;
+
+        }
+
+    }
+
+
+    /*
+       Find next customer
+    */
+
+    const next =
+        customers.find(
+            customer =>
+                customer.status ===
+                "waiting"
+        );
+
+
+    if (!next) {
+
+        await updateDashboard();
+
+        alert(
+            "No customers are waiting."
+        );
+
+        return;
+
+    }
+
+
+    /*
+       Start serving next customer
+    */
+
+    const {
+        error
+    } = await queueDB
+
+        .from(
+            "queue_customers"
+        )
+
+        .update({
+            status: "serving"
+        })
+
+        .eq(
+            "id",
+            next.id
+        );
+
+
+    if (error) {
+
+        console.error(error);
+
+        alert(
+            "Could not call next customer."
+        );
+
+        return;
+
+    }
+
+
+    await updateDashboard();
+
+
+    alert(
+        "📢 Now serving ✈️ " +
+        next.token +
+        " — " +
+        next.name
+    );
+
+}
+
+
+
+/* =========================
+   ADD DEMO CUSTOMER
+========================= */
+
+async function addDemoCustomer() {
+
+    const tokens = [
+
+        "B777",
+        "B787",
+        "A350",
+        "A320",
+        "A330",
+        "B737",
+        "A380",
+        "B747"
+
+    ];
+
+
+    const customers =
+        await getCustomers();
+
+
+    const usedTokens =
+        customers
+
+            .filter(
+                customer =>
+                    customer.status !==
+                    "served"
+            )
+
+            .map(
+                customer =>
+                    customer.token
+            );
+
+
+    let token =
+        tokens.find(
+            item =>
+                !usedTokens.includes(
+                    item
+                )
+        );
+
+
+    if (!token) {
+
+        let number = 2;
+
+
+        while (
+            usedTokens.includes(
+                `B777-${number}`
+            )
+        ) {
+
+            number++;
+
+        }
+
+
+        token =
+            `B777-${number}`;
+
+    }
+
+
+    /*
+       IMPORTANT:
+
+       Demo customer belongs to the
+       currently logged-in admin user
+       for now.
+
+       We will change this when the
+       proper admin permission is added.
+    */
+
+    const {
+        error
+    } = await queueDB
+
+        .from(
+            "queue_customers"
+        )
+
+        .insert({
+
+            user_id:
+                currentUser.id,
+
+            token:
+                token,
+
+            name:
+                "Demo Customer",
+
+            mobile:
+                "0000000000",
+
+            email:
+                currentUser.email,
+
+            place:
+                "City Care Clinic",
+
+            wait:
+                25,
+
+            status:
+                "waiting",
+
+            destination_lat:
+                13.0827,
+
+            destination_lng:
+                80.2707,
+
+            destination_address:
+                "City Care Clinic"
+
+        });
+
+
+    if (error) {
+
+        console.error(error);
+
+        alert(
+            "Could not add demo customer."
+        );
+
+        return;
+
+    }
+
+
+    await updateDashboard();
+
+}
+
+
+
+/* =========================
+   RESET QUEUE
+========================= */
+
+async function resetQueue() {
+
+    const confirmReset =
+        confirm(
+            "Are you sure you want to reset the queue?"
+        );
+
+
+    if (!confirmReset) {
+
+        return;
+
+    }
+
+
+    const customers =
+        await getCustomers();
+
+
+    for (
+        const customer of customers
+    ) {
+
+        const {
+            error
+        } = await queueDB
+
+            .from(
+                "queue_customers"
+            )
+
+            .update({
+                status: "served"
+            })
+
+            .eq(
+                "id",
+                customer.id
+            );
+
+
+        if (error) {
+
+            console.error(error);
+
+        }
+
+    }
+
+
+    await updateDashboard();
+
+
+    alert(
+        "Queue has been reset."
+    );
+
+}
+
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+async function logout() {
+
+    await queueDB.auth.signOut();
+
+    window.location.href =
+        "login.html";
+
+}
+
+
+
+/* =========================
+   HOME
+========================= */
+
+function goHome() {
+
+    window.location.href =
+        "index.html";
+
+}
+
+
+
+/* =========================
+   REALTIME
+========================= */
+
+function setupRealtime() {
+
+    queueDB
+
+        .channel(
+            "admin-queue-updates"
+        )
+
+        .on(
+
+            "postgres_changes",
+
+            {
+                event: "*",
+                schema: "public",
+                table: "queue_customers"
+            },
+
+            function(payload) {
+
+                console.log(
+                    "Queue changed:",
+                    payload
+                );
+
+
+                updateDashboard();
+
+            }
+
+        )
+
+        .subscribe();
+
+}
+
+
+
+/* =========================
+   START
+========================= */
+
+async function startApp() {
+
+    const loggedIn =
+        await checkLogin();
+
+
+    if (!loggedIn) {
+
+        return;
+
+    }
+
+
+    await updateDashboard();
+
+
+    setupRealtime();
+
+}
+
+
+startApp();
+
+
+</script>
+
+
+</body>
+
+</html>

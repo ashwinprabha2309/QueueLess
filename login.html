@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>QueueLess - Login</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#eef4ff;
+    font-family:Arial,sans-serif;
+}
+
+.container{
+    width:90%;
+    max-width:420px;
+    background:white;
+    padding:35px;
+    border-radius:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,.12);
+}
+
+.logo{
+    text-align:center;
+    color:#1769e0;
+    font-size:30px;
+    font-weight:bold;
+}
+
+h2{
+    text-align:center;
+    margin-bottom:8px;
+}
+
+.subtitle{
+    text-align:center;
+    color:#666;
+    margin-bottom:25px;
+}
+
+label{
+    display:block;
+    margin-top:15px;
+    font-weight:bold;
+}
+
+input{
+    width:100%;
+    padding:14px;
+    margin-top:8px;
+    border:1px solid #ccc;
+    border-radius:10px;
+    font-size:16px;
+}
+
+button{
+    width:100%;
+    padding:14px;
+    margin-top:22px;
+    border:none;
+    border-radius:10px;
+    background:#1769e0;
+    color:white;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#0d52b8;
+}
+
+.message{
+    text-align:center;
+    margin-top:15px;
+}
+
+.register{
+    text-align:center;
+    margin-top:20px;
+}
+
+.register a{
+    color:#1769e0;
+    font-weight:bold;
+    text-decoration:none;
+}
+
+#otpSection{
+    display:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="logo">
+        QUEUELESS ✈️
+    </div>
+
+    <h2>Customer Login</h2>
+
+    <p class="subtitle">
+        Login without a password
+    </p>
+
+
+    <!-- EMAIL -->
+
+    <div id="emailSection">
+
+        <label>Email</label>
+
+        <input
+            id="email"
+            type="email"
+            placeholder="Enter your email"
+            autocomplete="email"
+        >
+
+        <button onclick="sendCode()">
+            SEND VERIFICATION CODE
+        </button>
+
+    </div>
+
+
+    <!-- OTP -->
+
+    <div id="otpSection">
+
+        <label>Verification Code</label>
+
+        <input
+            id="otp"
+            type="text"
+            placeholder="Enter code from email"
+            maxlength="8"
+            inputmode="numeric"
+        >
+
+        <button onclick="verifyCode()">
+            VERIFY & LOGIN
+        </button>
+
+    </div>
+
+
+    <div
+        id="message"
+        class="message">
+    </div>
+
+
+    <div class="register">
+
+        New customer?
+
+        <a href="register.html">
+            Create an account
+        </a>
+
+    </div>
+
+</div>
+
+
+<script>
+
+// =================================
+// SUPABASE
+// =================================
+
+const SUPABASE_URL =
+    "https://bqnkuxawnksjufkjkabv.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_J41mt6w74FTBFBN8nj5LnQ_8ynQULAo";
+
+
+const queueDB =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+    );
+
+
+// =================================
+// SEND CODE
+// =================================
+
+async function sendCode(){
+
+    const email =
+        document.getElementById("email")
+        .value
+        .trim();
+
+    const message =
+        document.getElementById("message");
+
+
+    if(email === ""){
+
+        message.textContent =
+            "Please enter your email.";
+
+        return;
+    }
+
+
+    message.textContent =
+        "Sending verification code...";
+
+
+    const { error } =
+        await queueDB.auth.signInWithOtp({
+
+            email:email,
+
+            options:{
+                shouldCreateUser:true
+            }
+
+        });
+
+
+    if(error){
+
+        console.error(error);
+
+        message.textContent =
+            "Error: " + error.message;
+
+        return;
+    }
+
+
+    document.getElementById(
+        "emailSection"
+    ).style.display = "none";
+
+
+    document.getElementById(
+        "otpSection"
+    ).style.display = "block";
+
+
+    message.textContent =
+        "Verification code sent to your email.";
+}
+
+
+// =================================
+// VERIFY CODE
+// =================================
+
+async function verifyCode(){
+
+    const email =
+        document.getElementById("email")
+        .value
+        .trim();
+
+    const otp =
+        document.getElementById("otp")
+        .value
+        .trim();
+
+    const message =
+        document.getElementById("message");
+
+
+    if(otp === ""){
+
+        message.textContent =
+            "Please enter the verification code.";
+
+        return;
+    }
+
+
+    message.textContent =
+        "Verifying...";
+
+
+    const { data, error } =
+        await queueDB.auth.verifyOtp({
+
+            email:email,
+
+            token:otp,
+
+            type:"email"
+
+        });
+
+
+    if(error){
+
+        console.error(error);
+
+        message.textContent =
+            "Verification failed: " +
+            error.message;
+
+        return;
+    }
+
+
+    if(!data.session){
+
+        message.textContent =
+            "Login completed, but no session was created.";
+
+        return;
+    }
+
+
+    // =================================
+    // GET SAVED REGISTRATION DETAILS
+    // =================================
+
+    const name =
+        localStorage.getItem("queueName");
+
+    const mobile =
+        localStorage.getItem("queueMobile");
+
+
+    // =================================
+    // GET LOGGED-IN USER
+    // =================================
+
+    const user =
+        data.session.user;
+
+
+    // =================================
+    // SAVE CUSTOMER PROFILE
+    // =================================
+
+    if(name && mobile){
+
+        const { error:profileError } =
+            await queueDB
+            .from("customer_profiles")
+            .upsert({
+
+                id:user.id,
+
+                name:name,
+
+                mobile:mobile,
+
+                email:email
+
+            });
+
+
+        if(profileError){
+
+            console.error(profileError);
+
+            message.textContent =
+                "Login successful, but profile could not be saved: " +
+                profileError.message;
+
+            return;
+        }
+
+
+        // Details are now permanently stored.
+        localStorage.removeItem("queueName");
+        localStorage.removeItem("queueMobile");
+        localStorage.removeItem("queueEmail");
+
+    }
+
+
+    message.textContent =
+        "Login successful!";
+
+
+    setTimeout(function(){
+
+        window.location.href =
+            "dashboard.html";
+
+    },1000);
+
+}
+
+</script>
+
+</body>
+</html>

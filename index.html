@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>QueueLess</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #eef4ff;
+            color: #222;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 70px auto;
+            padding: 50px 30px;
+            background: white;
+            border-radius: 25px;
+            text-align: center;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.12);
+        }
+
+        .logo {
+            font-size: 48px;
+            font-weight: bold;
+            color: #1769e0;
+            letter-spacing: 2px;
+        }
+
+        .aircraft {
+            font-size: 75px;
+            margin: 20px 0;
+        }
+
+        h1 {
+            margin: 10px 0;
+            font-size: 32px;
+        }
+
+        .tagline {
+            color: #1769e0;
+            font-size: 21px;
+            font-weight: bold;
+        }
+
+        .description {
+            color: #666;
+            font-size: 18px;
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 35px;
+        }
+
+        .feature {
+            background: #f3f7ff;
+            padding: 20px 10px;
+            border-radius: 15px;
+        }
+
+        .feature-icon {
+            font-size: 30px;
+        }
+
+        .feature-title {
+            margin-top: 8px;
+            font-weight: bold;
+        }
+
+        button {
+            margin-top: 35px;
+            padding: 16px 45px;
+            border: none;
+            border-radius: 12px;
+            background: #1769e0;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0d52b8;
+        }
+
+        .admin-link {
+            display: block;
+            margin-top: 20px;
+            color: #1769e0;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        @media(max-width:600px) {
+
+            .container {
+                margin: 20px;
+                padding: 35px 20px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .logo {
+                font-size: 38px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <div class="logo">
+        QUEUELESS
+    </div>
+
+
+    <div class="aircraft">
+        ✈️
+    </div>
+
+
+    <h1>
+        Don't Wait. Just Arrive.
+    </h1>
+
+
+    <div class="tagline">
+        Your Queue. Your Time.
+    </div>
+
+
+    <p class="description">
+
+        Join a queue remotely, spend your waiting time
+        doing something useful, and arrive just before
+        your turn.
+
+    </p>
+
+
+    <div class="features">
+
+
+        <div class="feature">
+
+            <div class="feature-icon">
+                🎟️
+            </div>
+
+            <div class="feature-title">
+                Smart Queue
+            </div>
+
+        </div>
+
+
+        <div class="feature">
+
+            <div class="feature-icon">
+                📍
+            </div>
+
+            <div class="feature-title">
+                Nearby Places
+            </div>
+
+        </div>
+
+
+        <div class="feature">
+
+            <div class="feature-icon">
+                🔔
+            </div>
+
+            <div class="feature-title">
+                Smart Arrival
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <button onclick="goToRegister()">
+
+        GET STARTED
+
+    </button>
+
+
+    <a class="admin-link" href="admin.html">
+
+        Business / Admin Login
+
+    </a>
+
+
+</div>
+
+
+
+<script>
+
+function goToRegister() {
+
+    window.location.href = "register.html";
+
+}
+
+</script>
+
+
+</body>
+
+</html>

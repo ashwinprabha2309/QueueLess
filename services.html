@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>QueueLess - Services</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 30px auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .category {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        .category h2 {
+            margin-top: 0;
+        }
+
+        .business {
+            background: #f8fafc;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-top: 12px;
+            border-radius: 12px;
+        }
+
+        .business h3 {
+            margin: 0 0 5px 0;
+        }
+
+        .business p {
+            color: #666;
+            margin: 5px 0 12px;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 9px;
+            background: #2563eb;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .location-box {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.06);
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🚀 QueueLess</h1>
+
+    <p class="subtitle">
+        Choose the service you want to visit
+    </p>
+
+    <div class="location-box">
+        📍 Your location:
+        <strong id="userLocation">Loading...</strong>
+    </div>
+
+
+    <!-- HOSPITALS -->
+
+    <div class="category">
+
+        <h2>🏥 Hospitals & Clinics</h2>
+
+        <div class="business">
+
+            <h3>City Care Clinic</h3>
+
+            <p>
+                General consultation
+            </p>
+
+            <button onclick="joinQueue('City Care Clinic')">
+                JOIN QUEUE
+            </button>
+
+        </div>
+
+        <div class="business">
+
+            <h3>LifeCare Hospital</h3>
+
+            <p>
+                Medical consultation
+            </p>
+
+            <button onclick="joinQueue('LifeCare Hospital')">
+                JOIN QUEUE
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- BANKS -->
+
+    <div class="category">
+
+        <h2>🏦 Banks</h2>
+
+        <div class="business">
+
+            <h3>City Bank</h3>
+
+            <p>
+                Banking services
+            </p>
+
+            <button onclick="joinQueue('City Bank')">
+                JOIN QUEUE
+            </button>
+
+        </div>
+
+        <div class="business">
+
+            <h3>National Bank</h3>
+
+            <p>
+                Customer service
+            </p>
+
+            <button onclick="joinQueue('National Bank')">
+                JOIN QUEUE
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- SALONS -->
+
+    <div class="category">
+
+        <h2>💇 Salons</h2>
+
+        <div class="business">
+
+            <h3>Style Studio</h3>
+
+            <p>
+                Hair & grooming services
+            </p>
+
+            <button onclick="joinQueue('Style Studio')">
+                JOIN QUEUE
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- GOVERNMENT -->
+
+    <div class="category">
+
+        <h2>🏛 Government Offices</h2>
+
+        <div class="business">
+
+            <h3>Citizen Service Center</h3>
+
+            <p>
+                Public services
+            </p>
+
+            <button onclick="joinQueue('Citizen Service Center')">
+                JOIN QUEUE
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- SUPABASE -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="supabase.js"></script>
+
+
+<script>
+
+const userLocation =
+    localStorage.getItem("queueLocation");
+
+document.getElementById("userLocation").innerText =
+    userLocation || "Location not selected";
+
+
+// ==========================================
+// CHECK LOGIN
+// ==========================================
+
+async function checkLogin(){
+
+    const {
+        data: {
+            user
+        }
+    } = await queueDB.auth.getUser();
+
+
+    if(!user){
+
+        alert(
+            "Please login to join a queue."
+        );
+
+        window.location.href =
+            "login.html";
+
+        return false;
+    }
+
+
+    return user;
+}
+
+
+// ==========================================
+// JOIN QUEUE
+// ==========================================
+
+async function joinQueue(place) {
+
+    // Get logged-in customer
+    const user = await checkLogin();
+
+    if(!user){
+        return;
+    }
+
+
+    // Customer details
+    const name =
+        localStorage.getItem("queueName") || "";
+
+    const mobile =
+        localStorage.getItem("queueMobile") || "";
+
+    const email =
+        user.email || "";
+
+
+    /*
+        If name/mobile are missing,
+        get them from the customer profile.
+    */
+
+    let customerName = name;
+    let customerMobile = mobile;
+
+
+    if(!customerName || !customerMobile){
+
+        const {
+            data: profile,
+            error: profileError
+        } = await queueDB
+
+            .from("customer_profiles")
+
+            .select("name,mobile")
+
+            .eq("id", user.id)
+
+            .single();
+
+
+        if(profileError){
+
+            console.error(profileError);
+
+        } else {
+
+            customerName =
+                profile.name;
+
+            customerMobile =
+                profile.mobile;
+
+        }
+
+    }
+
+
+    if(!customerName){
+
+        alert(
+            "Customer profile not found. Please login again."
+        );
+
+        return;
+    }
+
+
+    /*
+        DEMO DESTINATION COORDINATES
+
+        Replace these later with actual
+        business coordinates.
+    */
+
+    const destinations = {
+
+        "City Care Clinic": {
+            lat: 13.0827,
+            lng: 80.2707,
+            address: "City Care Clinic"
+        },
+
+        "LifeCare Hospital": {
+            lat: 13.0674,
+            lng: 80.2376,
+            address: "LifeCare Hospital"
+        },
+
+        "City Bank": {
+            lat: 13.0475,
+            lng: 80.2573,
+            address: "City Bank"
+        },
+
+        "National Bank": {
+            lat: 13.0604,
+            lng: 80.2496,
+            address: "National Bank"
+        },
+
+        "Style Studio": {
+            lat: 13.0569,
+            lng: 80.2425,
+            address: "Style Studio"
+        },
+
+        "Citizen Service Center": {
+            lat: 13.0878,
+            lng: 80.2785,
+            address: "Citizen Service Center"
+        }
+
+    };
+
+
+    const destination =
+        destinations[place];
+
+
+    /*
+        AIRCRAFT TOKENS
+    */
+
+    const tokens = [
+
+        "B777",
+        "B787",
+        "A350",
+        "A320",
+        "A330",
+        "B737",
+        "A380",
+        "B747"
+
+    ];
+
+
+    /*
+        GET ACTIVE TOKENS
+    */
+
+    const {
+        data: activeCustomers,
+        error: fetchError
+    } = await queueDB
+
+        .from("queue_customers")
+
+        .select("token")
+
+        .in(
+            "status",
+            ["waiting", "serving"]
+        );
+
+
+    if(fetchError){
+
+        console.error(fetchError);
+
+        alert(
+            "Could not connect to QueueLess."
+        );
+
+        return;
+    }
+
+
+    const usedTokens =
+        (activeCustomers || [])
+        .map(
+            customer =>
+                customer.token
+        );
+
+
+    /*
+        FIND AVAILABLE TOKEN
+    */
+
+    let availableToken =
+        tokens.find(
+            token =>
+                !usedTokens.includes(token)
+        );
+
+
+    /*
+        IF ALL NORMAL TOKENS ARE USED
+    */
+
+    if(!availableToken){
+
+        let number = 2;
+
+        while(
+            usedTokens.includes(
+                `B777-${number}`
+            )
+        ){
+
+            number++;
+
+        }
+
+        availableToken =
+            `B777-${number}`;
+    }
+
+
+    /*
+        GET CUSTOMER GPS
+    */
+
+    const customerLatitude =
+        parseFloat(
+            localStorage.getItem(
+                "queueLatitude"
+            )
+        );
+
+    const customerLongitude =
+        parseFloat(
+            localStorage.getItem(
+                "queueLongitude"
+            )
+        );
+
+
+    /*
+        CREATE QUEUE
+
+        IMPORTANT:
+        user_id connects this queue
+        to the logged-in customer.
+    */
+
+    const {
+        data,
+        error
+    } = await queueDB
+
+        .from("queue_customers")
+
+        .insert({
+
+            user_id:
+                user.id,
+
+            name:
+                customerName,
+
+            mobile:
+                customerMobile,
+
+            email:
+                email,
+
+            token:
+                availableToken,
+
+            place:
+                place,
+
+            wait:
+                25,
+
+            status:
+                "waiting",
+
+            destination_lat:
+                destination.lat,
+
+            destination_lng:
+                destination.lng,
+
+            destination_address:
+                destination.address
+
+        })
+
+        .select()
+
+        .single();
+
+
+    if(error){
+
+        console.error(error);
+
+        alert(
+            "Unable to join queue.\n\n" +
+            error.message
+        );
+
+        return;
+    }
+
+
+    /*
+        SAVE SELECTED QUEUE
+    */
+
+    localStorage.setItem(
+        "selectedQueueId",
+        data.id
+    );
+
+
+    /*
+        KEEP OLD VALUES TOO
+        FOR COMPATIBILITY WITH
+        OTHER PAGES
+    */
+
+    localStorage.setItem(
+        "myQueueId",
+        data.id
+    );
+
+    localStorage.setItem(
+        "myToken",
+        data.token
+    );
+
+    localStorage.setItem(
+        "queuePlace",
+        data.place
+    );
+
+    localStorage.setItem(
+        "queueWait",
+        data.wait
+    );
+
+
+    /*
+        SAVE DESTINATION
+    */
+
+    localStorage.setItem(
+        "queueDestinationLat",
+        destination.lat
+    );
+
+    localStorage.setItem(
+        "queueDestinationLng",
+        destination.lng
+    );
+
+    localStorage.setItem(
+        "queueDestinationAddress",
+        destination.address
+    );
+
+
+    /*
+        SAVE CUSTOMER GPS
+    */
+
+    if(!isNaN(customerLatitude)){
+
+        localStorage.setItem(
+            "customerLatitude",
+            customerLatitude
+        );
+
+    }
+
+    if(!isNaN(customerLongitude)){
+
+        localStorage.setItem(
+            "customerLongitude",
+            customerLongitude
+        );
+
+    }
+
+
+    /*
+        GO TO QUEUE PAGE
+    */
+
+    window.location.href =
+        "queue.html";
+
+}
+
+</script>
+
+</body>
+</html>
