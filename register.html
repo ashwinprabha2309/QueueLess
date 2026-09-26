@@ -221,14 +221,24 @@ async function registerCustomer(){
         "Creating your account...";
 
 
-    // CREATE SUPABASE ACCOUNT
+    // CREATE ACCOUNT
+    // Name and mobile are stored as user metadata.
+    // The Supabase trigger automatically creates
+    // the customer_profiles record.
 
     const { data, error } =
         await queueDB.auth.signUp({
 
             email: email,
 
-            password: password
+            password: password,
+
+            options: {
+                data: {
+                    name: name,
+                    mobile: mobile
+                }
+            }
 
         });
 
@@ -250,37 +260,6 @@ async function registerCustomer(){
         message.className = "error";
         message.textContent =
             "Account could not be created.";
-
-        return;
-    }
-
-
-    // SAVE CUSTOMER PROFILE
-
-    const { error:profileError } =
-        await queueDB
-        .from("customer_profiles")
-        .upsert({
-
-            id:data.user.id,
-
-            name:name,
-
-            mobile:mobile,
-
-            email:email
-
-        });
-
-
-    if(profileError){
-
-        console.error(profileError);
-
-        message.className = "error";
-        message.textContent =
-            "Account created, but profile could not be saved: " +
-            profileError.message;
 
         return;
     }
