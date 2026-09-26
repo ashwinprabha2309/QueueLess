@@ -34,9 +34,7 @@ body{
     margin-bottom:10px;
 }
 
-h2{
-    text-align:center;
-}
+h2{text-align:center}
 
 .subtitle{
     text-align:center;
@@ -72,9 +70,7 @@ button{
     cursor:pointer;
 }
 
-button:hover{
-    background:#0d52b8;
-}
+button:hover{background:#0d52b8}
 
 .error{
     color:#d00;
@@ -137,8 +133,16 @@ button:hover{
         autocomplete="email"
     >
 
+    <label>Password</label>
+    <input
+        id="password"
+        type="password"
+        placeholder="Create a password"
+        autocomplete="new-password"
+    >
+
     <button onclick="registerCustomer()">
-        CONTINUE
+        CREATE ACCOUNT
     </button>
 
     <div id="message"></div>
@@ -150,12 +154,7 @@ button:hover{
 
 </div>
 
-
 <script>
-
-// ================================
-// SUPABASE
-// ================================
 
 const SUPABASE_URL =
     "https://bqnkuxawnksjufkjkabv.supabase.co";
@@ -163,16 +162,11 @@ const SUPABASE_URL =
 const SUPABASE_PUBLISHABLE_KEY =
     "sb_publishable_J41mt6w74FTBFBN8nj5LnQ_8ynQULAo";
 
-
 const queueDB = window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_PUBLISHABLE_KEY
 );
 
-
-// ================================
-// REGISTER CUSTOMER
-// ================================
 
 async function registerCustomer(){
 
@@ -185,20 +179,16 @@ async function registerCustomer(){
     const email =
         document.getElementById("email").value.trim();
 
+    const password =
+        document.getElementById("password").value;
+
     const message =
         document.getElementById("message");
 
 
-    // CHECK DETAILS
-
-    if(
-        name === "" ||
-        mobile === "" ||
-        email === ""
-    ){
+    if(!name || !mobile || !email || !password){
 
         message.className = "error";
-
         message.textContent =
             "Please fill in all the details.";
 
@@ -206,12 +196,9 @@ async function registerCustomer(){
     }
 
 
-    // BASIC MOBILE CHECK
-
     if(mobile.length < 10){
 
         message.className = "error";
-
         message.textContent =
             "Please enter a valid mobile number.";
 
@@ -219,42 +206,29 @@ async function registerCustomer(){
     }
 
 
+    if(password.length < 6){
+
+        message.className = "error";
+        message.textContent =
+            "Password must be at least 6 characters.";
+
+        return;
+    }
+
+
     message.className = "success";
-
     message.textContent =
-        "Sending verification code...";
+        "Creating your account...";
 
 
-    // SAVE CUSTOMER DETAILS LOCALLY
-    // They will be attached to the account
-    // after email verification.
+    // CREATE SUPABASE ACCOUNT
 
-    localStorage.setItem(
-        "queueName",
-        name
-    );
-
-    localStorage.setItem(
-        "queueMobile",
-        mobile
-    );
-
-    localStorage.setItem(
-        "queueEmail",
-        email
-    );
-
-
-    // SEND EMAIL VERIFICATION
-
-    const { error } =
-        await queueDB.auth.signInWithOtp({
+    const { data, error } =
+        await queueDB.auth.signUp({
 
             email: email,
 
-            options: {
-                shouldCreateUser: true
-            }
+            password: password
 
         });
 
@@ -264,28 +238,65 @@ async function registerCustomer(){
         console.error(error);
 
         message.className = "error";
-
         message.textContent =
-            "Error: " + error.message;
+            "Registration failed: " + error.message;
+
+        return;
+    }
+
+
+    if(!data.user){
+
+        message.className = "error";
+        message.textContent =
+            "Account could not be created.";
+
+        return;
+    }
+
+
+    // SAVE CUSTOMER PROFILE
+
+    const { error:profileError } =
+        await queueDB
+        .from("customer_profiles")
+        .upsert({
+
+            id:data.user.id,
+
+            name:name,
+
+            mobile:mobile,
+
+            email:email
+
+        });
+
+
+    if(profileError){
+
+        console.error(profileError);
+
+        message.className = "error";
+        message.textContent =
+            "Account created, but profile could not be saved: " +
+            profileError.message;
 
         return;
     }
 
 
     message.className = "success";
-
     message.textContent =
-        "Verification code sent to your email!";
+        "Account created successfully!";
 
-
-    // GO TO LOGIN PAGE
 
     setTimeout(function(){
 
         window.location.href =
-            "login.html";
+            "dashboard.html";
 
-    }, 1200);
+    },1000);
 
 }
 
